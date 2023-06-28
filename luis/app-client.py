@@ -11,15 +11,38 @@ import libclient
 sel = selectors.DefaultSelector()
 
 
-def create_request(value):
+def create_request(obj):
+    """
+    Creates a  request that is sent to the server.
+    Receives an object as parameter, that is created from our json file.
+    """
     return dict(
         type="text/json",
         encoding="utf-8",
-        content=value
+        content=obj
     )
 
 
+def check_args(args):
+    """
+    Checks if arguments are correct to start the program
+    If correct, return the object that we send. If not, program ends.
+    """
+    if len(args) != 4:
+        print(f"Usage: {args[0]} <host> <port> <json>")
+        sys.exit(1)
+    obj = libclient.is_valid_file(args[3])
+    if obj == False:
+        print(f"File {args[3]} is not a valid json")
+        sys.exit(1)
+    return obj
+
+
 def start_connection(host, port, request):
+    """
+    Starts a connection with the server.
+    Receives the socket where is working the server and the request that we will send
+    """
     addr = (host, port)
     print(f"Starting connection to {addr}")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,20 +52,13 @@ def start_connection(host, port, request):
     message = libclient.Message(sel, sock, addr, request)
     sel.register(sock, events, data=message)
 
-
-if len(sys.argv) != 4:
-    print(f"Usage: {sys.argv[0]} <host> <port> <json>")
-    sys.exit(1)
-item = libclient.is_valid_file(sys.argv[3])
-if item == False:
-    print(f"File {sys.argv[3]} is not a valid json")
-    sys.exit(1)
-
+# Set up client
+item = check_args(sys.argv)
 host, port = sys.argv[1], int(sys.argv[2])
-value = sys.argv[3]
 request = create_request(item)
 start_connection(host, port, request)
 
+# Connection loop
 try:
     while True:
         events = sel.select(timeout=1)
