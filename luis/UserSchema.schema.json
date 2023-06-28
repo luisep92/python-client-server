@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "object",
+      "properties": {
+        "first": {
+          "type": "string"
+        },
+        "second": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "first",
+        "second"
+      ]
+    },
+    "height": {
+      "type": "number"
+    },
+    "arms": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "url": {
+      "type": "string"
+    },
+    "age": {
+      "type": "integer"
+    },
+    "hasDriveLicense": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "height",
+    "arms",
+    "url",
+    "age",
+    "hasDriveLicense"
+  ]
+}

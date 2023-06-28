@@ -1,0 +1,16 @@
+  {
+  "name": {
+    "first": "Luis",
+    "second": "Escolano"
+  },
+  "height": 1.78,
+  "arms": [
+    "left",
+    "right"
+  ],
+  "url": "www.luisescolano.com",
+  "age": 30,
+  "hasDriveLicense": true,
+  "extra_param_1": "extra attribute to see if schema fails",
+  "extra_param_2": [1, 2, 3]
+  }
