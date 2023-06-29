@@ -22,14 +22,29 @@ def parse_arguments():
         description="Basic socket server which connect to the destinated host (send an empty string to accept every ip) in the desired port",
         epilog="Finished runtime")
 
-    parser.add_argument("host", default="", type=str, help="IP Adress where the socket will be created. Def: %(default)s")
-    parser.add_argument("port", default=65432, type=int, help="Port in which the socket will be allocated. Def: %(default)s")
+    parser.add_argument("host", nargs="?", type=str, help="IP Adress where the socket will be created")
+    parser.add_argument("port", nargs="?", type=int, help="Port %(default)s in which the socket will be allocated")
+    parser.add_argument("-e", "--especify", action="store_true")
+    
     args = parser.parse_args()
+    if args.especify:
+        if args.host == None:
+            code_error = 1
+            parser.exit(code_error, message="Code error %i: Host not especified\n" % code_error)
+        if args.port == None:
+            code_error = 2
+            parser.exit(code_error,message="Code error %i: Port not especified\n" % code_error)
+    
     return args
+
+def set_arguments(args):
+    if args.especify == False:
+        return "", 65432        
+    return args.host, args.port
 
 def main():
     args = parse_arguments()
-    host, port = args.host, int(args.port)
+    host, port = set_arguments(args)
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Avoid bind() exception: OSError: [Errno 48] Address already in use
     lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
