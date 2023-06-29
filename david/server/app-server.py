@@ -18,10 +18,12 @@ def accept_wrapper(sock):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Basic socket server which connect to the destinated host (send an empty string to accept every ip) in the desired port")
+    parser = argparse.ArgumentParser(prog="app-server",
+        description="Basic socket server which connect to the destinated host (send an empty string to accept every ip) in the desired port",
+        epilog="Finished runtime")
 
-    parser.add_argument("host")
-    parser.add_argument("port")
+    parser.add_argument("host", default="", type=str, help="IP Adress where the socket will be created. Def: %(default)s")
+    parser.add_argument("port", default=65432, type=int, help="Port in which the socket will be allocated. Def: %(default)s")
     args = parser.parse_args()
     return args
 
