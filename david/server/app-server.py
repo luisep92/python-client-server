@@ -23,8 +23,8 @@ def parse_arguments():
         epilog="Finished runtime")
 
     parser.add_argument("host", nargs="?", type=str, help="IP Adress where the socket will be created")
-    parser.add_argument("port", nargs="?", type=int, help="Port %(default)s in which the socket will be allocated")
-    parser.add_argument("-e", "--especify", action="store_true")
+    parser.add_argument("port", nargs="?", type=int, help="Port in which the socket will be allocated")
+    parser.add_argument("-e", "--especify", action="store_true", help="Says if the host and port must be especified")
     
     args = parser.parse_args()
     test_errors(parser, args)
