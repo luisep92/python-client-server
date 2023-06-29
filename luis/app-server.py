@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-
-import sys
 import socket
 import selectors
 import traceback
 import argparse
-from pathlib import Path
 
 import libserver
 
@@ -19,10 +15,14 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(
         prog="socket-server",
-        description="SUPER DESCRIPTION",
-        epilog="GOODBYYE"
+        description=
+        """
+            Server in python that receives json object an validate them against schema. 
+            Without arguments, socket will be 0.0.0.0:65432
+        """
     )
-    parser.add_argument("host", nargs="?", default="", help='IP of the socket where the server will listen. Entry an empty string to listen in all available IPs.')
+    parser.add_argument("host", nargs="?", default="", help="IP of the socket where the server will listen. "
+                                                            "Entry an empty string to listen in all available IPs.")
     parser.add_argument("port", nargs="?", default=65432, help="Port of the socket where the server will listen")
     parser.add_argument("-m", "--message", action="store_true")
     return parser.parse_args()
@@ -43,6 +43,7 @@ def set_up_connection(host, port):
     lsock.setblocking(False)
     sel.register(lsock, selectors.EVENT_READ, data=None)
 
+
 def accept_wrapper(sock):
     """
     Defines the behavior when a connection has been established with a client.
@@ -54,15 +55,12 @@ def accept_wrapper(sock):
     sel.register(conn, selectors.EVENT_READ, data=message)
 
 
-def notify_test(do=False):
-    if do:
-        print("HELLO, THIS IS A NOTIFICATION")
 
 def main():
     args = parse_args()
     set_up_connection(args.host, args.port)
 
-    #Loop that wait for a client
+    # Loop that wait for a client
     try:
         while True:
             events = sel.select(timeout=None)

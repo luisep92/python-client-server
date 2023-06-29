@@ -6,12 +6,18 @@ import struct
 
 
 def get_json(path):
+    """
+    Receives a path of a file and returns thar file as json object
+    """
     with open(path) as file:
         test = json.loads(file.read())
         return test
 
 
 def is_valid_file(path):
+    """
+    Receives a file and returns a json object if is valid, False if invalid.
+    """
     try:
         obj = get_json(path)
         return obj

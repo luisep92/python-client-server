@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-
-import sys
+import argparse
 import socket
 import selectors
 import traceback
-import json
-
 import libclient
+
 
 sel = selectors.DefaultSelector()
 
@@ -23,19 +20,36 @@ def create_request(obj):
     )
 
 
-def check_args(args):
+def parse_args():
     """
-    Checks if arguments are correct to start the program
-    If correct, return the object that we send. If not, program ends.
+    Parse arguments received via command line
+    If not valid, the program ends.
     """
-    if len(args) != 4:
-        print(f"Usage: {args[0]} <host> <port> <json>")
-        sys.exit(1)
-    obj = libclient.is_valid_file(args[3])
-    if obj == False:
-        print(f"File {args[3]} is not a valid json")
-        sys.exit(1)
-    return obj
+    parser = argparse.ArgumentParser(
+        prog="app-client",
+        description="Client that sends json objects to a server of validation. If socket is not defined, it sends it to 127.0.0.1:6532"
+    )
+    parser.add_argument("file", help="name of the json")
+    parser.add_argument("host", nargs="?", help="IP where the ser is listening. Default 127.0.0.1", default="127.0.0.1")
+    parser.add_argument("port", nargs="?", help="port where the server is listening. Default 65432", default=65432)
+    args = parser.parse_args()
+    obj = libclient.is_valid_file(args.file)
+    if not obj:
+        parser.exit(f"File {args.file} is not a valid json")
+    return obj, args
+
+
+def try_process_events(events):
+    for key, mask in events:
+        message = key.data
+        try:
+            message.process_events(mask)
+        except Exception:
+            print(
+                f"Main: Error: Exception for {message.addr}:\n"
+                f"{traceback.format_exc()}"
+            )
+            message.close()
 
 
 def start_connection(host, port, request):
@@ -52,30 +66,29 @@ def start_connection(host, port, request):
     message = libclient.Message(sel, sock, addr, request)
     sel.register(sock, events, data=message)
 
-# Set up client
-item = check_args(sys.argv)
-host, port = sys.argv[1], int(sys.argv[2])
-request = create_request(item)
-start_connection(host, port, request)
 
-# Connection loop
-try:
-    while True:
-        events = sel.select(timeout=1)
-        for key, mask in events:
-            message = key.data
-            try:
-                message.process_events(mask)
-            except Exception:
-                print(
-                    f"Main: Error: Exception for {message.addr}:\n"
-                    f"{traceback.format_exc()}"
-                )
-                message.close()
-        # Check for a socket being monitored to continue.
-        if not sel.get_map():
-            break
-except KeyboardInterrupt:
-    print("Caught keyboard interrupt, exiting")
-finally:
-    sel.close()
+def main():
+    # Set up client
+
+    item, args = parse_args()
+    host, port = args.host, int(args.port)
+    request = create_request(item)
+    start_connection(host, port, request)
+
+    # Connection loop
+    try:
+        while True:
+            events = sel.select(timeout=1)
+            try_process_events(events)
+            # Check for a socket being monitored to continue.
+            if not sel.get_map():
+                break
+    except KeyboardInterrupt:
+        print("Caught keyboard interrupt, exiting")
+    finally:
+        sel.close()
+
+
+#Program start
+if __name__ == "__main__":
+    main()

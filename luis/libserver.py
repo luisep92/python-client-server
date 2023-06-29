@@ -7,6 +7,10 @@ import jsonschema
 
 
 def validate_object_against_schema(obj, schema_file="UserSchema.schema.json"):
+    """
+    Validates a json against an schema.
+    Returns text depending if the validation is ok.
+    """
     with open(schema_file) as file:
         schema = json.load(file)
     try:
@@ -94,10 +98,11 @@ class Message:
         return message
 
     def _create_response_json_content(self):
-        print("-------------------------")
         #Make your program here and then set the answer,
         #self.request is the json object
+        print("-------------------------")
         answer = validate_object_against_schema(self.request)
+        print("-------------------------")
         content = {"result": answer}
         content_encoding = "utf-8"
         response = {
@@ -107,14 +112,6 @@ class Message:
         }
         return response
 
-    def _create_response_binary_content(self):
-        response = {
-            "content_bytes": b"First 10 bytes of request: "
-            + self.request[:10],
-            "content_type": "binary/custom-server-binary-type",
-            "content_encoding": "binary",
-        }
-        return response
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
@@ -206,11 +203,7 @@ class Message:
         self._set_selector_events_mask("w")
 
     def create_response(self):
-        if self.jsonheader["content-type"] == "text/json":
-            response = self._create_response_json_content()
-        else:
-            # Binary or unknown content-type
-            response = self._create_response_binary_content()
+        response = self._create_response_json_content()
         message = self._create_message(**response)
         self.response_created = True
         self._send_buffer += message
