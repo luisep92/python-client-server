@@ -7,7 +7,7 @@ import traceback
 import json
 import re
 
-import libclient
+from lib import libclient
 
 sel = selectors.DefaultSelector()
 
@@ -21,7 +21,6 @@ def load_json_file(data_file):
         sys.exit(1)
 
 def create_request(data_file: str):
-
     content = load_json_file(data_file)
     return dict(
         type="text/json",
@@ -49,35 +48,42 @@ if not re.compile(".*\.json").match(str(sys.argv[3])):
     sys.exit(1)
 
 
-
+"""
+Command created for debbugging
+"""
 # test_command = ["", "127.0.0.1", "65432", "Pepe.json"]
-
-host, port = sys.argv[1], int(sys.argv[2])
-json_file_name = sys.argv[3]
-
-
 # host, port = test_command[1], int(test_command[2])
 # json_file_name = test_command[3]
-request = create_request(json_file_name)
-start_connection(host, port, request)
 
-try:
-    while True:
-        events = sel.select(timeout=1)
-        for key, mask in events:
-            message = key.data
-            try:
-                message.process_events(mask)
-            except Exception:
-                print(
-                    f"Main: Error: Exception for {message.addr}:\n"
-                    f"{traceback.format_exc()}"
-                )
-                message.close()
-        # Check for a socket being monitored to continue.
-        if not sel.get_map():
-            break
-except KeyboardInterrupt:
-    print("Caught keyboard interrupt, exiting")
-finally:
-    sel.close()
+
+def main():
+    host, port = sys.argv[1], int(sys.argv[2])
+    json_file_name = sys.argv[3]
+
+    request = create_request(json_file_name)
+    start_connection(host, port, request)
+
+    try:
+        while True:
+            events = sel.select(timeout=1)
+            for key, mask in events:
+                message = key.data
+                try:
+                    message.process_events(mask)
+                except Exception:
+                    print(
+                        f"Main: Error: Exception for {message.addr}:\n"
+                        f"{traceback.format_exc()}"
+                    )
+                    message.close()
+            # Check for a socket being monitored to continue.
+            if not sel.get_map():
+                break
+    except KeyboardInterrupt:
+        print("Caught keyboard interrupt, exiting")
+    finally:
+        sel.close()
+
+
+if __name__ == "__main__":
+    main()
