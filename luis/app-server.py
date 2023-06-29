@@ -4,22 +4,30 @@ import sys
 import socket
 import selectors
 import traceback
+import argparse
+from pathlib import Path
 
 import libserver
 
 sel = selectors.DefaultSelector()
 
 
-def check_args(args):
+def parse_args():
     """
-    Check arguments that we receive asd  input of the program.
+    Parse arguments received via command line
     If not valid, the program ends.
     """
-    if len(args) != 3:
-        print(f"Usage: {args[0]} <host> <port>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        prog="socket-server",
+        description="SUPER DESCRIPTION",
+        epilog="GOODBYYE"
+    )
+    parser.add_argument("host", nargs="?", default="", help='IP of the socket where the server will listen. Entry an empty string to listen in all available IPs.')
+    parser.add_argument("port", nargs="?", default=65432, help="Port of the socket where the server will listen")
+    parser.add_argument("-m", "--message", action="store_true")
+    return parser.parse_args()
 
-#TODO: check server not responding to request
+
 def set_up_connection(host, port):
     """
     Sets up the server to wait for a client.
@@ -46,28 +54,37 @@ def accept_wrapper(sock):
     sel.register(conn, selectors.EVENT_READ, data=message)
 
 
-# Program start
-check_args(sys.argv)
-set_up_connection(sys.argv[1], sys.argv[2])
+def notify_test(do=False):
+    if do:
+        print("HELLO, THIS IS A NOTIFICATION")
 
-#Loop that wait for a client
-try:
-    while True:
-        events = sel.select(timeout=None)
-        for key, mask in events:
-            if key.data is None:
-                accept_wrapper(key.fileobj)
-            else:
-                message = key.data
-                try:
-                    message.process_events(mask)
-                except Exception:
-                    print(
-                        f"Main: Error: Exception for {message.addr}:\n"
-                        f"{traceback.format_exc()}"
-                    )
-                    message.close()
-except KeyboardInterrupt:
-    print("Caught keyboard interrupt, exiting")
-finally:
-    sel.close()
+def main():
+    args = parse_args()
+    set_up_connection(args.host, args.port)
+
+    #Loop that wait for a client
+    try:
+        while True:
+            events = sel.select(timeout=None)
+            for key, mask in events:
+                if key.data is None:
+                    accept_wrapper(key.fileobj)
+                else:
+                    message = key.data
+                    try:
+                        message.process_events(mask)
+                    except Exception:
+                        print(
+                            f"Main: Error: Exception for {message.addr}:\n"
+                            f"{traceback.format_exc()}"
+                        )
+                        message.close()
+    except KeyboardInterrupt:
+        print("Caught keyboard interrupt, exiting")
+    finally:
+        sel.close()
+
+
+# Program start
+if __name__ == "__main__":
+    main()
