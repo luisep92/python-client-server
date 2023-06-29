@@ -27,6 +27,11 @@ def parse_arguments():
     parser.add_argument("-e", "--especify", action="store_true")
     
     args = parser.parse_args()
+    test_errors(parser, args)
+    
+    return args
+
+def test_errors(parser, args):
     if args.especify:
         if args.host == None:
             code_error = 1
@@ -34,8 +39,6 @@ def parse_arguments():
         if args.port == None:
             code_error = 2
             parser.exit(code_error,message="Code error %i: Port not especified\n" % code_error)
-    
-    return args
 
 def set_arguments(args):
     if args.especify == False:
