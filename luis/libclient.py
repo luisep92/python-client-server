@@ -21,7 +21,7 @@ def is_valid_file(path):
     try:
         obj = get_json(path)
         return obj
-    except Exception:
+    except TypeError:
         return False
 
 

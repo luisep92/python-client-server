@@ -2,11 +2,13 @@ import socket
 import selectors
 import traceback
 import argparse
+import sys
 
 import libserver
 
 sel = selectors.DefaultSelector()
-
+default_host = ""
+default_port = 65432
 
 def parse_args():
     """
@@ -23,7 +25,7 @@ def parse_args():
     )
     parser.add_argument("host", nargs="?", default="", help="IP of the socket where the server will listen. "
                                                             "Entry an empty string to listen in all available IPs.")
-    parser.add_argument("port", nargs="?", default=65432, help="Port of the socket where the server will listen")
+    parser.add_argument("port", nargs="?", default=default_port, help="Port of the socket where the server will listen")
     parser.add_argument("-e", "--example", action="store_true", help="Shows an example line which you can use to run the program")
     args = parser.parse_args()
     if args.example:
@@ -40,7 +42,11 @@ def set_up_connection(host, port):
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Avoid bind() exception: OSError: [Errno 48] Address already in use
     lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    lsock.bind((host, port))
+    try:
+        lsock.bind((host, port))
+    except ValueError as error:
+        print(f"Error: Invalid host \n{error}")
+        sys.exit()
     lsock.listen()
     print(f"Listening on {(host, port)}")
     lsock.setblocking(False)
@@ -60,7 +66,7 @@ def accept_wrapper(sock):
 
 def try_process_connection(key, mask):
     """
-    Accepts the connection with the client and proccess read and write events
+    Accepts the connection with the client and processes read and write events
     """
     if key.data is None:
         accept_wrapper(key.fileobj)
@@ -68,7 +74,7 @@ def try_process_connection(key, mask):
         message = key.data
         try:
             message.process_events(mask)
-        except Exception:
+        except TypeError:
             print(
                 f"Main: Error: Exception for {message.addr}:\n"
                 f"{traceback.format_exc()}"
