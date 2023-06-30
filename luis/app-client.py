@@ -4,7 +4,7 @@ import selectors
 import traceback
 import libclient
 
-
+# This reference needs to exist before we declare the functions
 sel = selectors.DefaultSelector()
 
 
@@ -27,12 +27,16 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(
         prog="app-client",
-        description="Client that sends json objects to a server of validation. If socket is not defined, it sends it to 127.0.0.1:6532"
+        description="Client that sends json objects to a server of validation. "
+                    "If socket is not defined, it uses 127.0.0.1:6532"
     )
     parser.add_argument("file", help="name of the json")
     parser.add_argument("host", nargs="?", help="IP where the ser is listening. Default 127.0.0.1", default="127.0.0.1")
     parser.add_argument("port", nargs="?", help="port where the server is listening. Default 65432", default=65432)
+    parser.add_argument("-e", "--example", help="shows an example of execution of the client app")
     args = parser.parse_args()
+    if args.example:
+        parser.exit("Example: python3 app-client.py 127.0.0.1 65432 user.json")
     obj = libclient.is_valid_file(args.file)
     if not obj:
         parser.exit(f"File {args.file} is not a valid json")
@@ -69,7 +73,6 @@ def start_connection(host, port, request):
 
 def main():
     # Set up client
-
     item, args = parse_args()
     host, port = args.host, int(args.port)
     request = create_request(item)
