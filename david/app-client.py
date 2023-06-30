@@ -6,7 +6,7 @@ import selectors
 import traceback
 import json
 
-from lib import libclient
+import libclient
 
 sel = selectors.DefaultSelector()
 
@@ -39,11 +39,13 @@ def start_connection(host, port, request):
 
 
 """
-Command created for debbugging
+Command created for debugging
 """
 # test_command = ["", "127.0.0.1", "65432", "Pepe.json"]
 # host, port = test_command[1], int(test_command[2])
 # json_file_name = test_command[3]
+
+defaults = {"port":65432, "host": "127.0.0.1"}
 
 def set_arguments():
     parser = argparse.ArgumentParser()
@@ -55,17 +57,19 @@ def set_arguments():
     args = parser.parse_args()
 
     if not args.especify:
-        args.port = 65432
-        args.host = "127.0.0.1"
+        args.port = defaults["port"]
+        args.host = defaults["host"]
 
     if args.especify:
         if args.host == None:
             code_error = 1
-            parser.exit(code_error, "Code Error: %i, Host not especified" % code_error)
+            parser.exit(code_error, f"Code Error: {code_error}, Host not especified")
         if args.port == None:
             code_error = 2
-            parser.exit(code_error, "Code Error: %i, Port not especified" % code_error)
+            parser.exit(code_error, f"Code Error: {code_error}, Port not especified")
     return args
+
+
 def main():
     args = set_arguments()
     host, port = args.host, args.port

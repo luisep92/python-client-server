@@ -5,7 +5,7 @@ import socket
 import selectors
 import traceback
 
-import lib.libserver as libserver
+import libserver
 
 sel = selectors.DefaultSelector()
 
@@ -40,14 +40,14 @@ def test_errors(parser, args):
             code_error = 2
             parser.exit(code_error,message="Code error %i: Port not especified\n" % code_error)
 
-def set_arguments(args):
+def get_configuration(args):
     if args.especify == False:
         return "", 65432        
     return args.host, args.port
 
 def main():
     args = parse_arguments()
-    host, port = set_arguments(args)
+    host, port = get_configuration(args)
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Avoid bind() exception: OSError: [Errno 48] Address already in use
     lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
