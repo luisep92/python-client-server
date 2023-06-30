@@ -5,7 +5,6 @@ import socket
 import selectors
 import traceback
 import json
-import re
 
 from lib import libclient
 
