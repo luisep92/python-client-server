@@ -100,9 +100,7 @@ class Message:
     def _create_response_json_content(self):
         #Make your program here and then set the answer,
         #self.request is the json object
-        print("-------------------------")
         answer = validate_object_against_schema(self.request)
-        print("-------------------------")
         content = {"result": answer}
         content_encoding = "utf-8"
         response = {
