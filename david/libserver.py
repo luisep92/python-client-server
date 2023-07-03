@@ -3,15 +3,9 @@ import selectors
 import json
 import io
 import struct
-import user
+
 import jsonschema
-
-request_search = {
-    "morpheus": "Follow the white rabbit. \U0001f430",
-    "ring": "In the caves beneath the Misty Mountains. \U0001f48d",
-    "\U0001f436": "\U0001f43e Playing ball! \U0001f3d0",
-}
-
+CONTENT_ENCODING = "utf-8"
 
 class Message:
     def __init__(self, selector, sock, addr):
@@ -85,7 +79,7 @@ class Message:
             "content-encoding": content_encoding,
             "content-length": len(content_bytes),
         }
-        jsonheader_bytes = self._json_encode(jsonheader, "utf-8")
+        jsonheader_bytes = self._json_encode(jsonheader, CONTENT_ENCODING)
         message_hdr = struct.pack(">H", len(jsonheader_bytes))
         message = message_hdr + jsonheader_bytes + content_bytes
         return message
@@ -104,14 +98,12 @@ class Message:
                 return "JSON is not valid"
 
     def _create_response_json_content(self):
-        print(f"REQUEST: {self.request}")
-        content_encoding = "utf-8"
         answer = self.create_answer()
         content = {"result": answer}
         response = {
-            "content_bytes": self._json_encode(content, content_encoding),
+            "content_bytes": self._json_encode(content, CONTENT_ENCODING),
             "content_type": "text/json",
-            "content_encoding": content_encoding,
+            "content_encoding": CONTENT_ENCODING,
         }
         return response
 
@@ -181,7 +173,7 @@ class Message:
         hdrlen = self._jsonheader_len
         if len(self._recv_buffer) >= hdrlen:
             self.jsonheader = self._json_decode(
-                self._recv_buffer[:hdrlen], "utf-8"
+                self._recv_buffer[:hdrlen], CONTENT_ENCODING
             )
             self._recv_buffer = self._recv_buffer[hdrlen:]
             for reqhdr in (
